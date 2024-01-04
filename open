@@ -1,6 +1,15 @@
 #!/bin/bash
+filelist="$HOME/.local/share/applications/mimeapps.list \
+          /usr/share/applications/defaults.list"
+appdir=/usr/share/applications
+for f in $filelist; do
+    [ -f "$f" ] && lists="$lists $f"
+done
+[ -n "$lists" ] || exit 1
 for f in "$@"; do
-  t="$(file -biL "$f" | cut -d ';' -f 1)"
-  grep -h $t ~/.local/share/applications/mimeapps.list \
-             /usr/share/applications/defaults.list | head -1
+    type="$(file -biL "$f" | cut -d ';' -f 1)"
+    app="$(grep -h $type $lists | head -1 | cut -d = -f 2- | cut -d ';' -f 1)"
+    $(sed -n '/^\[Desktop Entry]/,/^\[/p' "$appdir/$app" |
+        grep "^Exec=" | cut -d = -f 2- | sed 's/ *%U//') "$f" &> /dev/null &
+    disown
 done
