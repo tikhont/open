@@ -9,7 +9,8 @@ done
 for f in "$@"; do
     type="$(file -biL "$f" | cut -d ';' -f 1)"
     app="$(grep -h $type $lists | head -1 | cut -d = -f 2- | cut -d ';' -f 1)"
+    which "$app" >/dev/null || sudo apt install -y "$(echo $app | sed s/\.desktop//)"
     $(sed -n '/^\[Desktop Entry]/,/^\[/p' "$appdir/$app" |
-        grep "^Exec=" | cut -d = -f 2- | sed 's/ *%U//') "$f" &> /dev/null &
+        grep "^Exec=" | cut -d = -f 2- | sed 's/ *%U//') "$f" &>/dev/null &
     disown
 done
