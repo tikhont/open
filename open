@@ -7,6 +7,10 @@ for f in $filelist; do
 done
 [ -n "$lists" ] || exit 1
 for f in "$@"; do
+    [ -e "$f" ] || {
+        echo "$f not found"
+        continue
+    }
     type="$(file -biL "$f" | cut -d ';' -f 1)"
     app="$(grep -h $type $lists | head -1 | cut -d = -f 2- | cut -d ';' -f 1)"
     which "$app" >/dev/null || sudo apt install -y "$(echo $app | sed s/\.desktop//)"
