@@ -12,9 +12,10 @@ for f in "$@"; do
         continue
     }
     type="$(file -biL "$f" | cut -d ';' -f 1)"
-    app="$(grep -h $type $lists | head -1 | cut -d = -f 2- | cut -d ';' -f 1)"
-    which "$app" >/dev/null || sudo apt install -y "$(echo $app | sed s/\.desktop//)"
-    $(sed -n '/^\[Desktop Entry]/,/^\[/p' "$appdir/$app" |
+    appfile="$(grep -h $type $lists | head -1 | cut -d = -f 2- | cut -d ';' -f 1)"
+    app="$(echo $appfile | sed s/\.desktop//)"
+    which "$app" >/dev/null || sudo apt install -y "$app"
+    $(sed -n '/^\[Desktop Entry]/,/^\[/p' "$appdir/$appfile" |
         grep "^Exec=" | cut -d = -f 2- | sed 's/ *%U//') "$f" &>/dev/null &
     disown
 done
