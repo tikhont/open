@@ -1,7 +1,7 @@
 #!/bin/bash
-filelist="$HOME/.local/share/applications/mimeapps.list \
-          /usr/share/applications/defaults.list"
 appdir=/usr/share/applications
+filelist="$HOME/.local/share/applications/mimeapps.list \
+          $appdir/defaults.list"
 for f in $filelist; do
     [ -f "$f" ] && lists="$lists $f"
 done
@@ -14,7 +14,14 @@ for f in "$@"; do
     type="$(file -biL "$f" | cut -d ';' -f 1)"
     appfile="$(grep -h $type $lists | head -1 | cut -d = -f 2- | cut -d ';' -f 1)"
     app="$(echo $appfile | sed s/\.desktop//)"
-    which "$app" >/dev/null || sudo apt install -y "$app"
+    which "$app" >/dev/null || {
+        which apt-file >/dev/null || {
+            sudo apt install apt-file
+            apt-file update
+        }
+        pkg="$(apt-file -lx search "bin/$app$" | sort -u)"
+        sudo apt install -y $pkg
+    }
     $(sed -n '/^\[Desktop Entry]/,/^\[/p' "$appdir/$appfile" |
         grep "^Exec=" | cut -d = -f 2- | sed 's/ *%U//') "$f" &>/dev/null &
     disown
