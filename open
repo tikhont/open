@@ -13,7 +13,12 @@ for f in "$@"; do
     }
     type="$(file -biL "$f" | cut -d ';' -f 1)"
     appfile="$(grep -h $type $lists | head -1 | cut -d = -f 2- | cut -d ';' -f 1)"
-    app="$(echo $appfile | sed s/\.desktop//)"
+    [ -n "$appfile" ] || {
+        echo "No default app for this file type: $type" >&2
+        continue
+    }
+    app=$(sed -n '/^\[Desktop Entry]/,/^\[/p' "$appdir/$appfile" |
+          grep "^Exec=" | cut -d = -f 2- | sed 's/ *%U//')
     which "$app" >/dev/null || {
         which apt-file >/dev/null || {
             sudo apt install apt-file
@@ -22,7 +27,6 @@ for f in "$@"; do
         pkg="$(apt-file -lx search "bin/$app$" | sort -u)"
         sudo apt install -y $pkg
     }
-    $(sed -n '/^\[Desktop Entry]/,/^\[/p' "$appdir/$appfile" |
-        grep "^Exec=" | cut -d = -f 2- | sed 's/ *%U//') "$f" &>/dev/null &
+    $app "$f" &>/dev/null &
     disown
 done
