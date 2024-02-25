@@ -19,7 +19,7 @@ for f in "$@"; do
     }
     app=$(sed -n '/^\[Desktop Entry]/,/^\[/p' "$appdir/$appfile" |
           grep "^Exec=" | cut -d = -f 2- | sed 's/ *%U//')
-    which "$app" >/dev/null || {
+    which $(echo $app | cut -d' ' -f1) >/dev/null || {
         which apt-file >/dev/null || {
             sudo apt install apt-file
             apt-file update
