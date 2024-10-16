@@ -1,7 +1,9 @@
 #!/bin/bash
 appdir=/usr/share/applications
 filelist="$HOME/.local/share/applications/mimeapps.list \
-          $appdir/defaults.list"
+          $HOME/.config/mimeapps.list
+          $appdir/defaults.list
+          $appdir/mimeinfo.cache"
 for f in $filelist; do
     [ -f "$f" ] && lists="$lists $f"
 done
