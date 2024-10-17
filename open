@@ -20,7 +20,7 @@ for f in "$@"; do
         continue
     }
     cmd="$(sed -n '/^\[Desktop Entry]/,/^\[/p' "$appdir/$appfile" |
-            grep "^Exec=" | cut -d = -f 2- | sed 's/ *%U//')"
+            grep "^Exec=" | cut -d = -f 2- | sed 's/ *%[Uf]//')"
     app=$(echo $cmd | cut -d' ' -f1)
     which $app >/dev/null || {
         which apt-file >/dev/null || {
